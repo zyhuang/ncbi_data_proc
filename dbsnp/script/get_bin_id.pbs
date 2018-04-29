@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#PBS -q scavenger
+#PBS -A scavenger
+#PBS -o log
+#PBS -V
+#PBS -j oe
+#PBS -N get_bin_id
+#PBS -l nodes=1:ppn=1,mem=5G
+#PBS -t 1-17
+
+#-q analysis
+#-A proj-fy0006
+#-l walltime=13:00:00:00
+
+#
+cd $PBS_O_WORKDIR
+
+# PBS_ARRAYID=12
+
+t1=$(date +%s)
+
+incr=1
+istart=$[(PBS_ARRAYID-1)*incr+1]
+iend=$[PBS_ARRAYID*incr]
+
+indir=../data/download/ftp.ncbi.nih.gov/snp/organisms/human_9606/database/organism_data
+outdir=../data/proc/bin_id_list
+
+for bcp in $(awk '$2~/^snp_id/' ../data/proc/schema/schema.list | cut -f1 | awk 'NR>='$istart' && NR<='$iend''); do
+    infile=$indir/$bcp.bcp.gz
+    outfile=$outdir/$bcp.bin.list
+    python3 get_bin_id.py $infile $outfile
+done
+
+
+
+t2=$(date +%s)
+dt=$[t2-t1]
+echo "% Job $PBS_ARRAYID is done in $(date -ud @$dt +%j:%T | awk -F\: '{printf("%03d:%02d:%02d:%02d\n",$1-1,$2,$3,$4)}')"
