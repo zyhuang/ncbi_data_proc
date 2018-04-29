@@ -23,7 +23,8 @@ incr=1
 istart=$[(PBS_ARRAYID-1)*incr+1]
 iend=$[PBS_ARRAYID*incr]
 
-for bin in $(cat parse_database_ancestral_allele.list | awk 'NR>='$istart' && NR<='$iend''); do
+binlist=../data/proc/bin_id_list/SNPAncestralAllele.bin.list
+for bin in $(cat $binlist | awk 'NR>='$istart' && NR<='$iend''); do
     python3 parse_database_ancestral_allele.py $bin
 done
 
